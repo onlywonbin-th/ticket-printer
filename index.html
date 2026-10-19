@@ -408,106 +408,244 @@ button:focus-visible,
 }
 
 
-/* =========================================================
-   FILE UPLOAD
-========================================================= */
+.certificate-field{
+  margin-bottom:26px;
+}
+
+.certificate-field > .lbl{
+  margin-bottom:10px;
+}
+
+
+/* ===============================
+   UPLOAD CARD
+================================ */
 
 .drop{
-  display:flex;
+  position:relative;
 
+  display:flex;
   align-items:center;
 
   gap:18px;
 
-  border:2.5px dashed #f09ac6;
+  min-height:150px;
 
+  padding:16px 18px;
+
+  border:2px dashed rgba(217,96,159,.55);
   border-radius:22px;
 
-  padding:16px;
-
-  background:rgba(255,255,255,.6);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.62),
+      rgba(255,244,251,.48)
+    );
 
   cursor:pointer;
 
   transition:
-    background .15s,
-    border-color .15s;
+    border-color .2s ease,
+    background .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
 }
 
 .drop:hover,
 .drop.over{
-  background:#fff;
-
   border-color:var(--pink-deep);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.9),
+      rgba(255,239,248,.75)
+    );
+
+  box-shadow:
+    0 8px 22px rgba(51,36,107,.08);
+
+  transform:translateY(-1px);
 }
+
+
+/* ซ่อน input จริง */
 
 .drop input{
   position:absolute;
 
-  opacity:0;
-
   width:1px;
   height:1px;
+
+  opacity:0;
+
+  pointer-events:none;
 }
 
+
+/* ===============================
+   PREVIEW
+================================ */
+
 .thumb{
-  width:84px;
-  height:112px;
+  width:90px;
+  height:116px;
 
-  flex:none;
-
-  border-radius:14px;
-
-  background:#efe6fb;
+  flex:0 0 90px;
 
   display:grid;
-
   place-items:center;
 
   overflow:hidden;
 
-  color:#a08ad6;
+  border-radius:14px;
 
-  font-size:32px;
+  background:
+    linear-gradient(
+      145deg,
+      #f8f4ff,
+      #eee5fa
+    );
+
+  border:1px solid rgba(107,87,169,.12);
+
+  box-shadow:
+    0 5px 12px rgba(51,36,107,.12);
 }
 
 .thumb img{
+  display:block;
+
   width:100%;
   height:100%;
 
-  object-fit:cover;
+  object-fit:contain;
 
-  display:block;
+  background:#fff;
 }
 
-.drop b{
+.upload-placeholder{
+  font-family:'Mali',sans-serif;
+
+  font-size:34px;
+  font-weight:500;
+
+  color:#aa91d5;
+}
+
+
+/* ===============================
+   TEXT
+================================ */
+
+.upload-info{
+  min-width:0;
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:flex-start;
+
+  gap:4px;
+}
+
+.upload-info b{
   display:block;
 
   font-family:'Mali','Prompt',sans-serif;
 
   font-size:18px;
+  font-weight:700;
 
-  margin-bottom:4px;
+  color:var(--ink);
 }
 
-.drop .hint{
-  color:#6a5aa3;
+.upload-info .hint{
+  font-size:13px;
 
-  font-size:14px;
-
-  line-height:1.5;
+  color:#7766a4;
 }
+
+
+/* fake button */
+
+.upload-button{
+  display:inline-flex;
+
+  align-items:center;
+  justify-content:center;
+
+  margin-top:9px;
+
+  padding:7px 15px;
+
+  border-radius:999px;
+
+  background:#fff;
+
+  border:1.5px solid rgba(217,96,159,.4);
+
+  color:var(--pink-deep);
+
+  font-family:'Mali','Prompt',sans-serif;
+
+  font-size:13px;
+  font-weight:700;
+
+  box-shadow:
+    0 3px 0 rgba(217,96,159,.15);
+}
+
+
+/* ===============================
+   ERROR
+================================ */
 
 .err{
+  min-height:0;
+
+  margin-top:7px;
+
   color:#b4235a;
 
-  font-size:14px;
-
-  margin-top:8px;
-
-  min-height:1em;
+  font-size:13px;
 }
 
+.err:empty{
+  display:none;
+}
+
+
+/* ===============================
+   MOBILE
+================================ */
+
+@media(max-width:480px){
+
+  .drop{
+    min-height:130px;
+
+    gap:14px;
+
+    padding:14px;
+  }
+
+  .thumb{
+    width:76px;
+    height:100px;
+
+    flex-basis:76px;
+  }
+
+  .upload-info b{
+    font-size:16px;
+  }
+
+  .upload-button{
+    margin-top:6px;
+  }
+}
 
 /* =========================================================
    CHECKBOX
@@ -1257,52 +1395,49 @@ button:disabled{
 
     <!-- ================= CERTIFICATE UPLOAD ================= -->
 
-    <div class="field">
+ <div class="field certificate-field">
 
-      <span class="lbl">
-        รูป certificate
+  <span class="lbl">
+    รูป certificate
+  </span>
+
+  <label class="drop" id="drop">
+
+    <input
+      type="file"
+      id="file"
+      accept="image/png,image/jpeg"
+    >
+
+    <div class="thumb" id="thumb">
+      <span class="upload-placeholder">＋</span>
+    </div>
+
+    <div class="upload-info">
+
+      <b id="dropTitle">
+        เลือกรูป Certificate
+      </b>
+
+      <span class="hint">
+        PNG หรือ JPG
       </span>
 
-      <label
-        class="drop"
-        id="drop"
-      >
-
-        <input
-          type="file"
-          id="file"
-          accept="image/*"
-        >
-
-        <div
-          class="thumb"
-          id="thumb"
-          aria-hidden="true"
-        >
-          +
-        </div>
-
-        <div>
-
-          <b id="dropTitle">
-            เลือกรูปภาพ
-          </b>
-
-          <span class="hint">
-            คลิกเพื่อเลือกไฟล์ หรือลากรูปมาวางตรงนี้ (PNG, JPG)
-          </span>
-
-        </div>
-
-      </label>
-
-      <div
-        class="err"
-        id="err"
-        role="alert"
-      ></div>
+      <span class="upload-button">
+        เลือกรูป
+      </span>
 
     </div>
+
+  </label>
+
+  <div
+    class="err"
+    id="err"
+    role="alert"
+  ></div>
+
+</div>
 
 
     <!-- ================= NAME ================= -->
