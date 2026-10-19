@@ -117,7 +117,8 @@ body::before{
   margin-bottom:10px;
 }
 
-.head svg{
+.head svg,
+.head-character{
   flex:none;
 }
 
@@ -791,6 +792,24 @@ button:disabled{
   }
 }
 
+  .head-character{
+  width:92px;
+  height:92px;
+  flex:none;
+
+  object-fit:contain;
+
+  /* รูปมี transparent space เลยขยายภาพด้านใน */
+  transform:scale(1.18);
+  transform-origin:center;
+}
+
+@media(max-width:600px){
+  .head-character{
+    width:76px;
+    height:76px;
+  }
+}
 
 /* =========================================================
    PRINTER FACE
@@ -1094,59 +1113,12 @@ button:disabled{
 
     <div class="head">
 
-      <svg
-        width="84"
-        height="84"
-        viewBox="0 0 100 100"
-        aria-hidden="true"
-      >
-
-        <circle
-          cx="50"
-          cy="54"
-          r="37"
-          fill="#ffe48a"
-        />
-
-        <path
-          d="M17 38 Q48 -8 84 30 Q56 22 17 38Z"
-          fill="#ff8fc3"
-        />
-
-        <circle
-          cx="86"
-          cy="32"
-          r="7"
-          fill="#fff"
-        />
-
-        <path
-          d="M30 56 q6 7 12 0M58 56 q6 7 12 0M46 67 q4 4 8 0"
-          stroke="#33246b"
-          stroke-width="3.5"
-          fill="none"
-          stroke-linecap="round"
-        />
-
-        <ellipse
-          cx="27"
-          cy="66"
-          rx="6"
-          ry="4"
-          fill="#ff8fc3"
-          opacity=".75"
-        />
-
-        <ellipse
-          cx="73"
-          cy="66"
-          rx="6"
-          ry="4"
-          fill="#ff8fc3"
-          opacity=".75"
-        />
-
-      </svg>
+<img
+  class="head-character"
+  src="5.PNG"
+  alt=""
+  aria-hidden="true"
+/>
 
       <h1>
         Marke your Certificate
@@ -1175,7 +1147,7 @@ button:disabled{
       >
 
       <p>
-        <span>ตีสามแล้ว ยังไม่หลับเลย</span>
+        <span>ตีสองแล้ว ยังไม่หลับเลย</span>
         <span>#RIIZE</span>
       </p>
 
@@ -2342,183 +2314,116 @@ button:disabled{
      2-6 ตัว = ย่ออัตโนมัติ
   ====================================================== */
 
-  function drawCharacters(ctx){
+function drawCharacters(ctx, certificateY){
 
-    const chars =
-      Array.from(
-        selectedCharacters.values()
-      );
+  const chars = Array.from(
+    selectedCharacters.values()
+  );
 
+  if(!chars.length){
+    return;
+  }
 
-    if(!chars.length){
+  const count = chars.length;
 
-      /*
-       * ไม่เลือกตัวละคร
-       * ใช้ zZ ตกแต่งแทน
-       */
+  /*
+   * ขนาดตัวละคร
+   */
+  const sizes = {
+    1: 180,
+    2: 160,
+    3: 165,
+    4: 128,
+    5: 112,
+    6: 102
+  };
 
-      ctx.fillStyle =
-        'rgba(255,228,138,.95)';
+  const size = sizes[count];
 
+  /*
+   * ให้ตัวละครซ้อนกันเล็กน้อย
+   */
+  const overlaps = {
+    1: 0,
+    2: 12,
+    3: 16,
+    4: 18,
+    5: 20,
+    6: 22
+  };
 
-      ctx.font =
-        `700 46px ${CUTE}`;
+  const overlap = overlaps[count];
 
+  const totalWidth =
+    (size * count) -
+    (overlap * (count - 1));
 
-      ctx.fillText(
-        'z',
-        64,
-        98
-      );
+  const startX =
+    (W - totalWidth) / 2;
 
+  /*
+   * ให้ตัวละครเกาะขอบบนของ Certificate
+   */
+  const baseY =
+    certificateY - (size * 0.72);
 
-      ctx.font =
-        `700 34px ${CUTE}`;
+  chars.forEach((img, index) => {
 
-
-      ctx.fillText(
-        'Z',
-        112,
-        86
-      );
-
-
-      ctx.font =
-        `700 26px ${CUTE}`;
-
-
-      ctx.fillText(
-        'z',
-        150,
-        72
-      );
-
-
-      return;
-    }
-
-
-    /*
-     * พื้นที่ตัวละคร
-     *
-     * Ticket กว้าง 640
-     * เว้นซ้าย/ขวา 45
-     */
-
-    const areaX = 45;
-
-    const areaY = 22;
-
-    const areaW = 550;
-
-    const areaH = 116;
-
-
-    const gap = 4;
-
+    const x =
+      startX +
+      index * (size - overlap);
 
     /*
-     * ขนาดตามจำนวน
+     * ตัวตรงกลางยกขึ้น
+     * ทำให้เรียงเป็นโค้งนิด ๆ
      */
+    const center =
+      (count - 1) / 2;
 
-    const sizes = {
+    const distance =
+      Math.abs(index - center);
 
-      1:110,
+    const lift =
+      (center - distance) * 8;
 
-      2:106,
+    const y =
+      baseY - lift;
 
-      3:100,
+    ctx.save();
 
-      4:94,
+    /*
+     * เงาแบบ sticker
+     */
+    ctx.shadowColor =
+      'rgba(20,10,60,.30)';
 
-      5:88,
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 4;
 
-      6:84
+    /*
+     * ขยายเพิ่ม เพราะ PNG
+     * มี transparent padding รอบตัว
+     */
+    const scale = 1.25;
 
-    };
+    const drawSize =
+      size * scale;
 
+    const offset =
+      (drawSize - size) / 2;
 
-    const size =
-      sizes[chars.length] || 84;
-
-
-    const totalWidth =
-      chars.length * size +
-      (
-        chars.length - 1
-      ) * gap;
-
-
-    const startX =
-      areaX +
-      (
-        areaW -
-        totalWidth
-      ) / 2;
-
-
-    chars.forEach(
-      (img,index) => {
-
-        const x =
-          startX +
-          index *
-          (
-            size +
-            gap
-          );
-
-
-        const y =
-          areaY +
-          (
-            areaH -
-            size
-          ) / 2;
-
-
-        ctx.save();
-
-
-        /*
-         * เงานิดเดียว
-         * ให้เหมือน sticker
-         */
-
-        ctx.shadowColor =
-          'rgba(20,10,60,.22)';
-
-
-        ctx.shadowBlur =
-          6;
-
-
-        ctx.shadowOffsetY =
-          3;
-
-
-        /*
-         * รูป PNG transparent
-         *
-         * ไม่ crop
-         * ไม่ใส่วงกลม
-         */
-
-        ctx.drawImage(
-          img,
-          x,
-          y,
-          size,
-          size
-        );
-
-
-        ctx.restore();
-
-      }
+    ctx.drawImage(
+      img,
+      x - offset,
+      y - offset,
+      drawSize,
+      drawSize
     );
 
-  }
+    ctx.restore();
+
+  });
+}
 
 
   /* =====================================================
@@ -2823,320 +2728,222 @@ button:disabled{
     );
 
 
-    /* =================================================
-       CHARACTERS
-       RIIZE ไม่ถูกวาดตรงนี้แล้ว
-    ================================================= */
+/* =================================================
+   TITLE + MOON
+================================================= */
+
+ctx.textBaseline = 'alphabetic';
+ctx.textAlign = 'left';
+
+ctx.fillStyle = '#ffc4de';
+
+fitText(
+  ctx,
+  title,
+  CUTE,
+  700,
+  44,
+  22,
+  430
+);
+
+ctx.fillText(
+  title,
+  60,
+  178
+);
+
+moon(
+  ctx,
+  548,
+  150,
+  28
+);
 
-    ctx.textBaseline =
-      'alphabetic';
 
+/* =================================================
+   CERTIFICATE SETTINGS
+================================================= */
 
-    ctx.textAlign =
-      'left';
+const fx = 60;
+const fy = 235;
+const fw = 520;
+const fh = 567;
 
 
-    drawCharacters(ctx);
+/* =================================================
+   CERTIFICATE FRAME
+================================================= */
 
+rr(
+  ctx,
+  fx,
+  fy,
+  fw,
+  fh,
+  24
+);
 
-    /* =================================================
-       TITLE + MOON
-    ================================================= */
+ctx.fillStyle = 'rgba(255,255,255,.12)';
+ctx.fill();
 
-    ctx.fillStyle =
-      '#ffc4de';
+ctx.lineWidth = 2.5;
+ctx.strokeStyle = 'rgba(255,255,255,.35)';
+ctx.stroke();
 
 
-    fitText(
-      ctx,
-      title,
-      CUTE,
-      700,
-      44,
-      22,
-      430
-    );
+/* =================================================
+   CERTIFICATE IMAGE
+================================================= */
 
+if(certImg){
 
-    ctx.fillText(
-      title,
-      60,
-      178
-    );
+  const p = 14;
 
+  const aw = fw - (2 * p);
+  const ah = fh - (2 * p);
 
-    moon(
-      ctx,
-      548,
-      150,
-      28
-    );
+  /*
+   * contain
+   * ไม่ crop certificate
+   */
+  const s = Math.min(
+    aw / certImg.naturalWidth,
+    ah / certImg.naturalHeight
+  );
 
+  const iw = certImg.naturalWidth * s;
+  const ih = certImg.naturalHeight * s;
 
-    /* =================================================
-       CERTIFICATE FRAME
-    ================================================= */
+  const ix = fx + (fw - iw) / 2;
+  const iy = fy + (fh - ih) / 2;
 
-    const fx = 60;
+  ctx.save();
 
-    const fy = 206;
+  rr(
+    ctx,
+    ix,
+    iy,
+    iw,
+    ih,
+    16
+  );
 
-    const fw = 520;
+  ctx.clip();
 
-    const fh = 596;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
+  ctx.drawImage(
+    certImg,
+    ix,
+    iy,
+    iw,
+    ih
+  );
 
-    rr(
-      ctx,
-      fx,
-      fy,
-      fw,
-      fh,
-      24
-    );
+  ctx.restore();
+}
 
 
-    ctx.fillStyle =
-      'rgba(255,255,255,.12)';
+/* =================================================
+   CHARACTER STICKERS
 
+   วาดหลัง Certificate
+   = เด็กจะอยู่ด้านหน้ากรอบเหมือน sticker
+================================================= */
 
-    ctx.fill();
+drawCharacters(ctx, fy);
 
 
-    ctx.lineWidth =
-      2.5;
+/* =================================================
+   NAME
+================================================= */
 
+ctx.fillStyle = 'rgba(255,255,255,.65)';
 
-    ctx.strokeStyle =
-      'rgba(255,255,255,.35)';
+ctx.font = '500 18px Prompt, sans-serif';
 
+ctx.textAlign = 'left';
 
-    ctx.stroke();
+ctx.fillText(
+  'NAME',
+  60,
+  846
+);
 
+ctx.fillStyle = '#fff';
 
-    /* =================================================
-       CERTIFICATE IMAGE
-    ================================================= */
+fitText(
+  ctx,
+  name,
+  CUTE,
+  700,
+  58,
+  24,
+  520
+);
 
-    if(certImg){
+ctx.fillText(
+  name,
+  60,
+  902
+);
 
-      const p =
-        14;
 
+/* =================================================
+   DATE / NO.
+================================================= */
 
-      const aw =
-        fw -
-        2*p;
+ctx.fillStyle = 'rgba(255,255,255,.78)';
 
+ctx.font = '500 20px Prompt, sans-serif';
 
-      const ah =
-        fh -
-        2*p;
+ctx.textAlign = 'left';
 
+ctx.fillText(
+  date,
+  60,
+  948
+);
 
-      /*
-       * contain
-       *
-       * ไม่ crop certificate
-       */
+ctx.textAlign = 'right';
 
-      const s =
-        Math.min(
-          aw /
-          certImg.naturalWidth,
+ctx.fillText(
+  'NO. ' + code.replace(/-/g, ''),
+  580,
+  948
+);
 
-          ah /
-          certImg.naturalHeight
-        );
 
+/* =================================================
+   PERFORATION
+================================================= */
 
-      const iw =
-        certImg.naturalWidth *
-        s;
+ctx.setLineDash([
+  10,
+  9
+]);
 
+ctx.lineWidth = 2.5;
 
-      const ih =
-        certImg.naturalHeight *
-        s;
+ctx.strokeStyle = 'rgba(255,255,255,.75)';
 
+ctx.beginPath();
 
-      const ix =
-        fx +
-        (
-          fw -
-          iw
-        ) /
-        2;
+ctx.moveTo(
+  NOTCH + 8,
+  PERF
+);
 
+ctx.lineTo(
+  W - NOTCH - 8,
+  PERF
+);
 
-      const iy =
-        fy +
-        (
-          fh -
-          ih
-        ) /
-        2;
+ctx.stroke();
 
-
-      ctx.save();
-
-
-      rr(
-        ctx,
-        ix,
-        iy,
-        iw,
-        ih,
-        16
-      );
-
-
-      ctx.clip();
-
-
-      ctx.imageSmoothingEnabled =
-        true;
-
-
-      ctx.imageSmoothingQuality =
-        'high';
-
-
-      ctx.drawImage(
-        certImg,
-        ix,
-        iy,
-        iw,
-        ih
-      );
-
-
-      ctx.restore();
-
-    }
-
-
-    /* =================================================
-       NAME
-    ================================================= */
-
-    ctx.fillStyle =
-      'rgba(255,255,255,.65)';
-
-
-    ctx.font =
-      '500 18px Prompt, sans-serif';
-
-
-    ctx.textAlign =
-      'left';
-
-
-    ctx.fillText(
-      'NAME',
-      60,
-      846
-    );
-
-
-    ctx.fillStyle =
-      '#fff';
-
-
-    fitText(
-      ctx,
-      name,
-      CUTE,
-      700,
-      58,
-      24,
-      520
-    );
-
-
-    ctx.fillText(
-      name,
-      60,
-      902
-    );
-
-
-    /* =================================================
-       DATE / NO.
-    ================================================= */
-
-    ctx.fillStyle =
-      'rgba(255,255,255,.78)';
-
-
-    ctx.font =
-      '500 20px Prompt, sans-serif';
-
-
-    ctx.textAlign =
-      'left';
-
-
-    ctx.fillText(
-      date,
-      60,
-      948
-    );
-
-
-    ctx.textAlign =
-      'right';
-
-
-    ctx.fillText(
-      'NO. ' +
-      code.replace(
-        /-/g,
-        ''
-      ),
-      580,
-      948
-    );
-
-
-    /* =================================================
-       PERFORATION
-    ================================================= */
-
-    ctx.setLineDash([
-      10,
-      9
-    ]);
-
-
-    ctx.lineWidth =
-      2.5;
-
-
-    ctx.strokeStyle =
-      'rgba(255,255,255,.75)';
-
-
-    ctx.beginPath();
-
-
-    ctx.moveTo(
-      NOTCH+8,
-      PERF
-    );
-
-
-    ctx.lineTo(
-      W-NOTCH-8,
-      PERF
-    );
-
-
-    ctx.stroke();
-
-
-    ctx.setLineDash([]);
-
+ctx.setLineDash([]);
 
     /* =================================================
        BARCODE
@@ -3261,7 +3068,7 @@ button:disabled{
 
 
     ctx.fillText(
-      'ADMIT ONE',
+      'ONLYWONBIN TH',
       W/2+4,
       PERF+222
     );
